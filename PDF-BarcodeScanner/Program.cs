@@ -49,13 +49,13 @@ namespace PDF_BarcodeScanner
             Console.WriteLine("Enter the directory of PDFs:");
             string directory = Console.ReadLine();
             //directory = "C:\Users\htthomas\Desktop\Labs"
-            converter.PDFtoPNG(directory, @"{directory}\png", 192);
+            converter.PDFtoPNG(directory, $"{directory}\\png", 192);
 
             //barcode locating and scanning
-            var pngDirInfo = new DirectoryInfo(@"{directory}\png");
+            var pngDirInfo = new DirectoryInfo($"{directory}\\png");
             FileInfo[] pngFileInfo = pngDirInfo.GetFiles("*.png");
 
-            var outputFile = @"{directory}\output.txt";
+            var outputFile = $"{directory}\\output.txt";
 
             double successes = 0.0; double failures = 0.0;
             foreach (FileInfo png in pngFileInfo)
@@ -65,8 +65,16 @@ namespace PDF_BarcodeScanner
 
                 if (barcodeValue != null)
                 {
-                    Console.WriteLine(png.Name + " - " + barcode.ScanBarcode(cropped));
-                    logger.Log(png.Name + " - " + barcode.ScanBarcode(cropped), outputFile);
+                    string barcodeString = barcodeValue.ToString();
+                    int index = barcodeString.IndexOf("-");
+                    if (index > 0)
+                        barcodeString = barcodeString.Substring(0, index);
+
+                    string subStr = png.Name.Substring(3, png.Name.Length - 6);
+                    System.IO.File.Copy($"{directory}\\{subStr}", $"{directory}\\scanned\\{barcodeString}.pdf");
+
+                    Console.WriteLine(png.Name + " - " + barcodeString);
+                    logger.Log(png.Name + " - " + barcodeString, outputFile);
                     successes += 1;
                 }
                 else
@@ -76,8 +84,8 @@ namespace PDF_BarcodeScanner
                     failures += 1;
                 }
             }
-            Console.WriteLine("Accuracy: " + (100 * (successes / (successes + failures))) + "%");
-            logger.Log("Accuracy: " + (100 * (successes / (successes + failures))) + "%", outputFile);
+            Console.WriteLine("Accuracy: " + (100 * (successes / (successes + failures))) + "%\n");
+            logger.Log("Accuracy: " + (100 * (successes / (successes + failures))) + "%\n", outputFile);
         }
     }
 }

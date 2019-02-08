@@ -63,7 +63,10 @@ namespace PDF_BarcodeScanner
 
             Bitmap bitmap = Image.FromFile(file.FullName) as Bitmap;
             Bitmap cropped = cropAtRect(bitmap, cropRect1);
-            cropped.Save(@"{file.DirectoryName}\croppedBarcodes\{file.Name}", ImageFormat.Png);
+
+            Directory.CreateDirectory($"{file.DirectoryName}\\croppedBarcodes");
+            var super = $"{file.DirectoryName}\\croppedBarcodes\\{file.Name}";
+            cropped.Save(super, ImageFormat.Png);
 
             return cropped;
         }

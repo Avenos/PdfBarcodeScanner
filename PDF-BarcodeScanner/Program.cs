@@ -14,7 +14,7 @@
 //be easily scanned by ZXing (the barcode reading library).
 //
 //Notes:
-//This program has roughly a 50% accuracy rate at finding and scanning
+//This program has roughly a xx% accuracy rate at finding and scanning
 //barcodes.  If it can't find a barcode in a PDF, it will move the PDF
 //to another folder for it to be manually scanned by a person.  Fortunately,
 //false positives are very rare; the program typically reads the barcodes
@@ -22,7 +22,7 @@
 //
 //Libraries:
 //Ghostscript.NET for PDF to bitmap conversion
-//OpenCvSharp for barcode recognition
+//OpenCvSharp for barcode locating
 //ZXing.NET for barcode scanning
 //
 //Helpful Resources:
@@ -42,40 +42,42 @@ namespace PDF_BarcodeScanner
     {
         static void Main(string[] args)
         {
-            Converter converter = new Converter();
-            Barcode barcode = new Barcode();
+            var converter = new Converter();
+            var barcode = new Barcode();
+            var logger = new Logger();
 
             Console.WriteLine("Enter the directory of PDFs:");
-            //string directory = Console.ReadLine();
-            converter.PDFtoPNG(@"C:\Users\htthomas\Desktop\Labs", @"C:\Users\htthomas\Desktop\Labs\png\", 192);
+            string directory = Console.ReadLine();
+            //directory = "C:\Users\htthomas\Desktop\Labs"
+            converter.PDFtoPNG(directory, @"{directory}\png", 192);
 
-            //barcode finding and scanning
-            DirectoryInfo dirInfo2 = new DirectoryInfo(@"C:\Users\htthomas\Desktop\Labs\png\");
-            FileInfo[] PNGs = dirInfo2.GetFiles("*.png");
+            //barcode locating and scanning
+            var pngDirInfo = new DirectoryInfo(@"{directory}\png");
+            FileInfo[] pngFileInfo = pngDirInfo.GetFiles("*.png");
 
-            Logger logger = new Logger();
-            string outputFile = @"C:\Users\htthomas\Desktop\Labs\output.txt";
+            var outputFile = @"{directory}\output.txt";
 
-            double success = 0.0; double fail = 0.0;
-            foreach (FileInfo png in PNGs)
+            double successes = 0.0; double failures = 0.0;
+            foreach (FileInfo png in pngFileInfo)
             {
                 Bitmap cropped = barcode.FindBarcode(png);
                 ZXing.Result barcodeValue = barcode.ScanBarcode(cropped);
 
                 if (barcodeValue != null)
                 {
-                    Console.WriteLine(png.Name + "---" + barcode.ScanBarcode(cropped));
-                    logger.Log(png.Name + "---" + barcode.ScanBarcode(cropped), outputFile);
-                    success += 1;
+                    Console.WriteLine(png.Name + " - " + barcode.ScanBarcode(cropped));
+                    logger.Log(png.Name + " - " + barcode.ScanBarcode(cropped), outputFile);
+                    successes += 1;
                 }
                 else
                 {
-                    Console.WriteLine(png.Name + "---" + "Barcode read failure!");
-                    logger.Log(png.Name + "---" + "Barcode read failure!", outputFile);
-                    fail += 1;
+                    Console.WriteLine(png.Name + " - " + "Barcode read failure!");
+                    logger.Log(png.Name + " - " + "Barcode read failure!", outputFile);
+                    failures += 1;
                 }
             }
-            Console.WriteLine("Accuracy: " + (100 * (success / (success + fail))) + "%");
+            Console.WriteLine("Accuracy: " + (100 * (successes / (successes + failures))) + "%");
+            logger.Log("Accuracy: " + (100 * (successes / (successes + failures))) + "%", outputFile);
         }
     }
 }

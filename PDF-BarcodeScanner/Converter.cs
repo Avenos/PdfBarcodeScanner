@@ -12,7 +12,7 @@ namespace PDF_BarcodeScanner
         /// <returns>Void</returns>
         public void PDFtoPNG(string inputDir, string outputDir, int dpi)
         {
-            DirectoryInfo dirInfo = new DirectoryInfo(inputDir);
+            var dirInfo = new DirectoryInfo(inputDir);
             FileInfo[] PDFs = dirInfo.GetFiles("*.pdf");
             Directory.CreateDirectory(outputDir);
             using (var rasterizer = new GhostscriptRasterizer())
@@ -31,4 +31,3 @@ namespace PDF_BarcodeScanner
         }
     }
 }
-

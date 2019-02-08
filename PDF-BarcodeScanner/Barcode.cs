@@ -51,10 +51,10 @@ namespace PDF_BarcodeScanner
             HierarchyIndex[] h = new HierarchyIndex[9999];
             Cv2.FindContours(closed.Clone(), out contours, out h, 0, ContourApproximationModes.ApproxSimple);
 
-            OpenCvSharp.Point[] biggestContour = getBiggestContour(contours);
+            Tuple<OpenCvSharp.Point[], OpenCvSharp.Point[]> biggestContours = getBiggestContours(contours);
             //compute the rotated bounding box of the largest two contours
-            RotatedRect rect = Cv2.MinAreaRect(biggestContour);
-            //RotatedRect rect2 = Cv2.MinAreaRect(secondBiggestContour);
+            RotatedRect rect = Cv2.MinAreaRect(biggestContours.Item1);
+            //RotatedRect rect = Cv2.MinAreaRect(biggestContours.Item2);
 
             //convert from RotatedRect to Rect and double size
             System.Drawing.Size size = new System.Drawing.Size((int)(rect.Size.Width * 2), (int)(rect.Size.Height * 2));
@@ -63,26 +63,34 @@ namespace PDF_BarcodeScanner
 
             Bitmap bitmap = Image.FromFile(file.FullName) as Bitmap;
             Bitmap cropped = cropAtRect(bitmap, cropRect1);
-            cropped.Save(@"C:\Users\htthomas\Desktop\Labs\cropped\" + file.Name, ImageFormat.Png); //for testing
+            cropped.Save(@"{file.DirectoryName}\croppedBarcodes\{file.Name}", ImageFormat.Png);
 
             return cropped;
         }
 
-        /// <summary>Gets the biggest contour in a set</summary>
-        /// <returns>The biggest contour</returns>
-        public OpenCvSharp.Point[] getBiggestContour(OpenCvSharp.Point[][] contours)
+        /// <summary>Gets the teo biggest contours in a set</summary>
+        /// <returns>The two biggest contours</returns>
+        public Tuple<OpenCvSharp.Point[], OpenCvSharp.Point[]> getBiggestContours(OpenCvSharp.Point[][] contours)
         {
             double biggestContourArea = -99999;
+            double secondBiggestContourArea = -99998;
             OpenCvSharp.Point[] biggestContour = null;
+            OpenCvSharp.Point[] secondBiggestContour = null;
+
             foreach (OpenCvSharp.Point[] contour in contours)
             {
                 if (Cv2.ContourArea(contour) > biggestContourArea)
                 {
-                    biggestContourArea = Cv2.ContourArea(contour);
                     biggestContour = contour;
+                    biggestContourArea = Cv2.ContourArea(contour);
+                }
+                else if (Cv2.ContourArea(contour) > secondBiggestContourArea)
+                {
+                    secondBiggestContour = contour;
+                    secondBiggestContourArea = Cv2.ContourArea(contour);
                 }
             }
-            return biggestContour;
+            return Tuple.Create(biggestContour, secondBiggestContour);
         }
 
         /// <summary>Crops a bitmap to a rectangle</summary>

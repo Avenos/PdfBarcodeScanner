@@ -24,7 +24,9 @@ Ghostscript.NET for PDF to bitmap conversion
 OpenCvSharp for barcode locating
 ZXing.NET for barcode scanning
 
+THE GHOSTSCRIPT 32-BIT RASTERIZER NEEDS TO BE INSTALLED ON YOUR MACHINE FOR THIS PROGRAM TO WORK
+https://github.com/ArtifexSoftware/ghostpdl-downloads/releases/download/gs926/gs926aw32.exe
+
 Helpful Resources:
 https://www.pyimagesearch.com/2014/11/24/detecting-barcodes-images-python-opencv/
 (used to construct the FindBarcode method)
-http://www.ghostscript.com/download/gsdnld.html
